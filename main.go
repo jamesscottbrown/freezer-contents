@@ -1,12 +1,53 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path"
 )
+
+//go:embed ui/build/*
+var ui embed.FS
+
+//
+// fsFunc is short-hand for constructing a http.FileSystem
+// implementation
+type fsFunc func(name string) (fs.File, error)
+
+func (f fsFunc) Open(name string) (fs.File, error) {
+	return f(name)
+}
+
+// AssetHandler returns an http.Handler that will serve files from
+// the Assets embed.FS.  When locating a file, it will strip the given
+// prefix from the request and prepend the root to the filesystem
+// lookup: typical prefix might be /web/, and root would be build.
+func AssetHandler(prefix, root string) http.Handler {
+	handler := fsFunc(func(name string) (fs.File, error) {
+		assetPath := path.Join(root, name)
+
+		// If we can't find the asset, return the default index.html
+		// content
+		f, err := ui.Open(assetPath)
+		if os.IsNotExist(err) {
+			return ui.Open("build/index.html")
+		}
+
+		// Otherwise assume this is a legitimate request routed
+		// correctly
+		return f, err
+	})
+
+	return http.StripPrefix(prefix, http.FileServer(http.FS(handler)))
+}
+
+//
 
 func main() {
 
@@ -16,15 +57,39 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/state", handleStateRequest)
-	mux.HandleFunc("/remove", handleRemoveRequest)
-	mux.HandleFunc("/move", handleMoveRequest)
-	mux.HandleFunc("/add", handleAddRequest)
+	uiSub, err := fs.Sub(ui, "ui/build")
+	if err != nil {
+		panic(err)
+	}
+	fileServer := http.FileServer(http.FS(uiSub))
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/", fileServer)
+
+	mux.HandleFunc("/state", CORS(handleStateRequest))
+	mux.HandleFunc("/remove", CORS(handleRemoveRequest))
+	mux.HandleFunc("/move", CORS(handleMoveRequest))
+	mux.HandleFunc("/add", CORS(handleAddRequest))
 
 	mux.HandleFunc("/list", handleListRequest)
-	mux.HandleFunc("/", handleRootRequest)
+	//	mux.HandleFunc("/", handleRootRequest)
 	http.ListenAndServe(*port, mux)
 
+}
+
+func CORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Credentials", "true")
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+		if r.Method == "OPTIONS" {
+			http.Error(w, "No Content", http.StatusNoContent)
+			return
+		}
+
+		next(w, r)
+	}
 }
 
 func handleRootRequest(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +102,7 @@ func handleRootRequest(w http.ResponseWriter, r *http.Request) {
 
 func handleListRequest(w http.ResponseWriter, r *http.Request) {
 
-	w.Write([]byte(`WOO!`))
+	w.Write([]byte(`Ok`))
 }
 
 func readState(f string) ([]byte, error) {
@@ -152,6 +217,11 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 	for i, freezer := range contents.Freezers {
 		for j, item := range freezer.Contents {
 
+			// don't run off end of list of contents, which may be shortened during this loop
+			if j > len(contents.Freezers[i].Contents)-1 {
+				continue
+			}
+
 			for k, container := range item.Containers {
 				// remove container
 				if container == t.Container {
@@ -210,6 +280,11 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	for i, freezer := range contents.Freezers {
 		for j, item := range freezer.Contents {
 
+			// don't run off end of list of contents, which may be shortened during this loop
+			if j > len(contents.Freezers[i].Contents)-1 {
+				continue
+			}
+
 			for k, container := range item.Containers {
 				// remove container from old freezer
 				if container == t.Container {
@@ -231,10 +306,10 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 
 			// Look for item in new freezer
 			itemExists := false
-			for _, item := range freezer.Contents {
+			for j, item := range freezer.Contents {
 				if item.Name == moveItem.Name && item.Date == moveItem.Date {
 					itemExists = true
-					item.Containers = append(item.Containers, t.Container)
+					contents.Freezers[i].Contents[j].Containers = append(item.Containers, t.Container)
 				}
 			}
 

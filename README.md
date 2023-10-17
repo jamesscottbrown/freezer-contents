@@ -1,11 +1,15 @@
 
+Starting serveR:  
 
-# Getting state
+
+# API
+
+## Getting state
 
 curl http://localhost:8080/state
 
 
-# Removing item
+## Removing item
 
 curl --header "Content-Type: application/json" \
   --request POST \
@@ -16,7 +20,7 @@ curl --header "Content-Type: application/json" \
   // or /bowl-1/remove
 
 
-# Adding item
+## Adding item
 
 curl --header "Content-Type: application/json" \
   --request POST \
@@ -30,7 +34,7 @@ curl --header "Content-Type: application/json" \
   http://localhost:8080/add | jq
 
 
-# Moving
+## Moving
 
 curl --header "Content-Type: application/json" \
   --request POST \
@@ -43,3 +47,6 @@ Tests:
 - move only container of item; check parent item removed
 - move container, check added to existing item in new fridge
 - move container, check new item created
+
+
+curl http://localhost:9090/state
