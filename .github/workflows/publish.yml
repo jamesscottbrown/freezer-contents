@@ -22,7 +22,7 @@ jobs:
 
       - name: Install front-end dependencies
         working-directory: ui/
-        run: npm ci
+        run: npm ci --force
 
       - name: Build front-end
         working-directory: ui/
