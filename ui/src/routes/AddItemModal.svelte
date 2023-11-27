@@ -5,8 +5,41 @@
     export let freezerName: string;
     export let isOpen: boolean;
 
+    const generateContainerNames = () => {
+        let containerNames = [];
+
+        let numNamesToGenerate = +numContainers;
+
+        let usedContainers: string[] = [];
+        for (const freezer of $state.Freezers){
+            for (const content of freezer.Contents){
+                usedContainers = [...usedContainers, ...content.Containers];
+            }
+        }
+
+        let i = 0;
+        while (numNamesToGenerate > 0){
+            const name = `u-${i}`;
+            if (!usedContainers.includes(name)){
+                containerNames.push(name);
+                numNamesToGenerate--;
+            }
+            i++;
+        }
+
+        return containerNames;
+    }
+
     const addItem = () => {
         const url = "/add";
+
+        let containerNames = [];
+
+        if (!!containers.trim()){
+            containerNames = containers.split(",").map(n => n.trim());
+        } else {
+            containerNames = generateContainerNames();
+        }
 
         fetch(url, {
             method: "POST",
@@ -14,7 +47,7 @@
                 Name: itemName,
                 Date: (new Date()).toISOString().slice(0,10),
                 Freezer: freezerName,
-                Containers: containers.split(",").map(n => n.trim())
+                Containers: containerNames
 
             }),
             headers: {
@@ -29,6 +62,7 @@
 
     let itemName = "";
     let containers = "";
+    let numContainers = "";
 
 </script>
 
@@ -71,6 +105,10 @@
                 <label for="containers">Containers:</label>
                 <input type="text" id="containers" class="form-input" bind:value={containers}/>
 
+                <p>or</p>
+
+                <label for="numContainers">Number of unlabelled containers:</label>
+                <input type="text" id="numContainers" class="form-input" bind:value={numContainers}/>
             </div>
 
             <button on:click={addItem} class="px-2 border border-green-500 rounded">Add</button>
