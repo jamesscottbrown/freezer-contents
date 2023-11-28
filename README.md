@@ -1,5 +1,9 @@
+> :warning: This was written hastily for personal use, and is very rough-and-ready. I don't recommend other people use it.
 
-Starting serveR:  
+
+A webapp for inventorying the food stored in one or more freezer.
+
+Starting server:  
 
 
 # API
