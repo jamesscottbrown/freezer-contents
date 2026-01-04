@@ -1,9 +1,24 @@
 <script lang="ts">
     import { Dialog, DialogOverlay, DialogTitle } from "@rgossiaux/svelte-headlessui";
+    import Select from "svelte-select";
     import {state} from "$lib/stores.ts";
 
     export let freezerName: string;
     export let isOpen: boolean;
+
+    type ContainerType = {
+        value: string;
+        label: string;
+    };
+
+    const containerTypes: ContainerType[] = [
+        { value: "containers", label: "Containers" },
+        { value: "bowls", label: "Bowls" },
+        { value: "jars", label: "Jars" },
+        { value: "numContainers", label: "Other (unlabelled)" }
+    ];
+
+    let selectedContainerType: ContainerType = containerTypes[0];
 
     const generateContainerNames = () => {
         let containerNames = [];
@@ -36,6 +51,7 @@
         bowls = "";
         jars = "";
         numContainers = "";
+        selectedContainerType = containerTypes[0];
     }
 
     const addItem = () => {
@@ -43,11 +59,11 @@
 
         let containerNames = [];
 
-        if (!!containers.trim()){
+        if (selectedContainerType.value === "containers"){
             containerNames = containers.split(",").map(n => n.trim());
-        } else if (!!bowls.trim()){
+        } else if (selectedContainerType.value === "bowls"){
             containerNames = bowls.split(",").map(n => "bowl_" + n.trim());
-        } else if (!!jars.trim()){
+        } else if (selectedContainerType.value === "jars"){
             containerNames = jars.split(",").map(n => "jar_" + n.trim());
         } else {
             containerNames = generateContainerNames();
@@ -109,35 +125,43 @@
                 </button>
             </div>
 
+            <div class="flex flex-col px-4 gap-4">
 
-            <div class="flex flex-col pl-2">
+                <div class="flex flex-col pl-2">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" class="form-input" bind:value={itemName}/>
+                </div>
 
+                <div class="flex flex-col pl-2">
+                    <label for="containerType">Container Type:</label>
+                    <Select
+                        items={containerTypes}
+                        bind:value={selectedContainerType}
+                        clearable={false}
+                        searchable={false}
+                    />
+                </div>
 
-                <label for="name">Name:</label>
-                <input type="text" id="name" class="form-input" bind:value={itemName}/>
-
-                <label for="containers">Containers:</label>
-                <input type="text" id="containers" class="form-input" bind:value={containers}/>
-
-                <p>or</p>
-
-                <label for="bowls">Bowls:</label>
-                <input type="text" id="bowls" class="form-input" bind:value={bowls}/>
-
-                <p>or</p>
-
-                <label for="jars">Jars:</label>
-                <input type="text" id="jars" class="form-input" bind:value={jars}/>
-
-                <p>or</p>
-
-                <label for="numContainers">Number of unlabelled containers:</label>
-                <input type="text" id="numContainers" class="form-input" bind:value={numContainers}/>
+                <div class="flex flex-col pl-2">
+                    {#if selectedContainerType.value === "containers"}
+                        <label for="containers">Numbers (comma-separated):</label>
+                        <input type="text" id="containers" class="form-input" bind:value={containers}/>
+                    {:else if selectedContainerType.value === "bowls"}
+                        <label for="bowls">Numbers (comma-separated):</label>
+                        <input type="text" id="bowls" class="form-input" bind:value={bowls}/>
+                    {:else if selectedContainerType.value === "jars"}
+                        <label for="jars">Numbers (comma-separated):</label>
+                        <input type="text" id="jars" class="form-input" bind:value={jars}/>
+                    {:else if selectedContainerType.value === "numContainers"}
+                        <label for="numContainers">Number of unlabelled containers:</label>
+                        <input type="text" id="numContainers" class="form-input" bind:value={numContainers}/>
+                    {/if}
+                </div>
 
                 <button on:click={clearFields} class="px-2 border border-red-500 rounded">Clear</button>
-            </div>
 
-            <button on:click={addItem} class="px-2 border border-green-500 rounded">Add</button>
+                <button on:click={addItem} class="px-2 border border-green-500 rounded">Add</button>
+            </div>
 
         </div>
     </div>
