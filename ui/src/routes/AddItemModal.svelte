@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Dialog, DialogDescription, DialogOverlay, DialogTitle} from "@rgossiaux/svelte-headlessui";
+    import { Dialog, DialogOverlay, DialogTitle } from "@rgossiaux/svelte-headlessui";
     import {state} from "$lib/stores.ts";
 
     export let freezerName: string;
@@ -30,6 +30,14 @@
         return containerNames;
     }
 
+    const clearFields = () => {
+        itemName = "";
+        containers = "";
+        bowls = "";
+        jars = "";
+        numContainers = "";
+    }
+
     const addItem = () => {
         const url = "/add";
 
@@ -37,6 +45,10 @@
 
         if (!!containers.trim()){
             containerNames = containers.split(",").map(n => n.trim());
+        } else if (!!bowls.trim()){
+            containerNames = bowls.split(",").map(n => "bowl_" + n.trim());
+        } else if (!!jars.trim()){
+            containerNames = jars.split(",").map(n => "jar_" + n.trim());
         } else {
             containerNames = generateContainerNames();
         }
@@ -62,6 +74,8 @@
 
     let itemName = "";
     let containers = "";
+    let bowls = "";
+    let jars = "";
     let numContainers = "";
 
 </script>
@@ -107,8 +121,20 @@
 
                 <p>or</p>
 
+                <label for="bowls">Bowls:</label>
+                <input type="text" id="bowls" class="form-input" bind:value={bowls}/>
+
+                <p>or</p>
+
+                <label for="jars">Jars:</label>
+                <input type="text" id="jars" class="form-input" bind:value={jars}/>
+
+                <p>or</p>
+
                 <label for="numContainers">Number of unlabelled containers:</label>
                 <input type="text" id="numContainers" class="form-input" bind:value={numContainers}/>
+
+                <button on:click={clearFields} class="px-2 border border-red-500 rounded">Clear</button>
             </div>
 
             <button on:click={addItem} class="px-2 border border-green-500 rounded">Add</button>
