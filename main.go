@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"net/http"
+	"sync"
 )
 
 //go:embed ui/build/*
@@ -15,6 +16,9 @@ var ui embed.FS
 
 // contentsFile is the path to the contents JSON file. It can be overridden for testing.
 var contentsFile = "contents.json"
+
+// fileMutex protects concurrent access to the contents file.
+var fileMutex sync.Mutex
 
 func main() {
 
@@ -83,6 +87,9 @@ func readState(f string) ([]byte, error) {
 }
 
 func handleStateRequest(w http.ResponseWriter, r *http.Request) {
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+
 	// read the contents.json file
 	out, err := ioutil.ReadFile(contentsFile)
 	if err != nil {
@@ -111,6 +118,9 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
 	if err != nil {
@@ -171,6 +181,9 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
 	if err != nil {
@@ -233,6 +246,9 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
 	if err != nil {
