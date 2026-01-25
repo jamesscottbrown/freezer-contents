@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseNumberInput, buildContainerNames } from './containerNames';
+import { parseNumberInput, buildContainerNames, parseContainerName, sortContainerNames } from './containerNames';
 
 describe('parseNumberInput', () => {
     it('should parse a single number', () => {
@@ -85,5 +85,66 @@ describe('buildContainerNames', () => {
         expect(buildContainerNames('', 'containers')).toEqual([]);
         expect(buildContainerNames('', 'bowls')).toEqual([]);
         expect(buildContainerNames('', 'jars')).toEqual([]);
+    });
+});
+
+describe('parseContainerName', () => {
+    it('should parse underscore-separated names', () => {
+        expect(parseContainerName('bowl_5')).toEqual({ type: 'bowl', number: 5 });
+        expect(parseContainerName('jar_10')).toEqual({ type: 'jar', number: 10 });
+    });
+
+    it('should parse hyphen-separated names', () => {
+        expect(parseContainerName('u-3')).toEqual({ type: 'u', number: 3 });
+        expect(parseContainerName('box-42')).toEqual({ type: 'box', number: 42 });
+    });
+
+    it('should parse plain numbers', () => {
+        expect(parseContainerName('42')).toEqual({ type: '', number: 42 });
+        expect(parseContainerName('1')).toEqual({ type: '', number: 1 });
+    });
+
+    it('should handle names without separator', () => {
+        expect(parseContainerName('bowl5')).toEqual({ type: 'bowl', number: 5 });
+    });
+
+    it('should fallback for unrecognized formats', () => {
+        expect(parseContainerName('abc')).toEqual({ type: 'abc', number: 0 });
+    });
+});
+
+describe('sortContainerNames', () => {
+    it('should sort numerically within same type', () => {
+        expect(sortContainerNames(['bowl_10', 'bowl_2', 'bowl_1'])).toEqual(['bowl_1', 'bowl_2', 'bowl_10']);
+    });
+
+    it('should sort alphabetically by type first', () => {
+        expect(sortContainerNames(['jar_1', 'bowl_1', 'u-1'])).toEqual(['bowl_1', 'jar_1', 'u-1']);
+    });
+
+    it('should handle mixed types and numbers', () => {
+        expect(sortContainerNames(['jar_5', 'bowl_3', 'jar_2', 'bowl_10'])).toEqual(['bowl_3', 'bowl_10', 'jar_2', 'jar_5']);
+    });
+
+    it('should handle plain numbers (no type prefix)', () => {
+        expect(sortContainerNames(['10', '2', '1'])).toEqual(['1', '2', '10']);
+    });
+
+    it('should sort plain numbers before prefixed containers', () => {
+        expect(sortContainerNames(['bowl_1', '5', '2'])).toEqual(['2', '5', 'bowl_1']);
+    });
+
+    it('should handle empty array', () => {
+        expect(sortContainerNames([])).toEqual([]);
+    });
+
+    it('should not mutate original array', () => {
+        const original = ['bowl_10', 'bowl_2', 'bowl_1'];
+        sortContainerNames(original);
+        expect(original).toEqual(['bowl_10', 'bowl_2', 'bowl_1']);
+    });
+
+    it('should handle u- prefix containers', () => {
+        expect(sortContainerNames(['u-10', 'u-2', 'u-1'])).toEqual(['u-1', 'u-2', 'u-10']);
     });
 });

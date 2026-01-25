@@ -1,5 +1,6 @@
 <script lang="ts">
     import { appState } from "$lib/stores";
+    import { sortContainerNames } from "$lib/containerNames";
 
     let { item, freezerName }: { item: any; freezerName: string } = $props();
 
@@ -56,7 +57,7 @@
 
 <div class="flex gap-2">
     <span>{item.Name} ({item.Date})</span>
-    {#each item.Containers.sort() as container}
+    {#each sortContainerNames(item.Containers) as container}
         <button onclick={() => openDialog(container)}
                 class="px-2 border border-grey-500 rounded">{container}</button>
     {/each}
