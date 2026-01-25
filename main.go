@@ -13,6 +13,9 @@ import (
 //go:embed ui/build/*
 var ui embed.FS
 
+// contentsFile is the path to the contents JSON file. It can be overridden for testing.
+var contentsFile = "contents.json"
+
 func main() {
 
 	port := flag.String("port", ":8080", "port to serve on")
@@ -81,8 +84,7 @@ func readState(f string) ([]byte, error) {
 
 func handleStateRequest(w http.ResponseWriter, r *http.Request) {
 	// read the contents.json file
-	f := "contents.json"
-	out, err := ioutil.ReadFile(f)
+	out, err := ioutil.ReadFile(contentsFile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -110,7 +112,7 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contents, err := readContents("contents.json")
+	contents, err := readContents(contentsFile)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println(err)
@@ -138,7 +140,7 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// save JSON to file
-	err = writeContents("contents.json", contents)
+	err = writeContents(contentsFile, contents)
 
 	// return the json
 	json := json.NewEncoder(w)
@@ -170,7 +172,7 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contents, err := readContents("contents.json")
+	contents, err := readContents(contentsFile)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println(err)
@@ -201,7 +203,7 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// save JSON to file
-	err = writeContents("contents.json", contents)
+	err = writeContents(contentsFile, contents)
 
 	// return the json
 	json := json.NewEncoder(w)
@@ -232,7 +234,7 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contents, err := readContents("contents.json")
+	contents, err := readContents(contentsFile)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println(err)
@@ -285,7 +287,7 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// save JSON to file
-	err = writeContents("contents.json", contents)
+	err = writeContents(contentsFile, contents)
 
 	// return the json
 	json := json.NewEncoder(w)
