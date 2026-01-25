@@ -17,10 +17,10 @@ It stores data in a JSON file (`contents.json`).
 
 ## Building
 
-Run the build script to compile both the frontend and backend:
+Use the [just](https://github.com/casey/just) command runner to build the frontend and backend.
 
 ```bash
-./build.sh
+just build
 ```
 
 This will:
@@ -33,7 +33,7 @@ Start the server:
 
 ```bash
 ./freezer-contents
-```
+``
 
 The server runs on port 8080 by default.
 
