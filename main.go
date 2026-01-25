@@ -7,7 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
+	"os"
 	"net/http"
 	"sync"
 )
@@ -73,7 +73,7 @@ func handleStateRequest(w http.ResponseWriter, r *http.Request) {
 	defer fileMutex.Unlock()
 
 	// read the contents.json file
-	out, err := ioutil.ReadFile(contentsFile)
+	out, err := os.ReadFile(contentsFile)
 	if err != nil {
 		fmt.Println(err)
 	}
