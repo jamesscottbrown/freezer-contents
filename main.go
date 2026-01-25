@@ -173,8 +173,7 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileMutex.L	if t.Container == "" {
-ock()
+	fileMutex.Lock()
 	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
