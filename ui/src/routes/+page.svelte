@@ -14,7 +14,7 @@
     const tabs: { id: TabId; label: string }[] = [
         { id: "location", label: "Group by Location" },
         { id: "contents", label: "Group by Contents" },
-        { id: "number", label: "Group by Number" },
+        { id: "number", label: "Group by Label" },
     ];
 
     const getData = () => {
