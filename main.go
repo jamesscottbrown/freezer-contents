@@ -96,7 +96,7 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 	var t AddBody
 	err := decoder.Decode(&t)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
@@ -119,7 +119,7 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !freezerExists {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error: freezer does not exist")
 		return
 	}
@@ -156,8 +156,7 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 	var t RemoveBody
 	err := decoder.Decode(&t)
 	if err != nil {
-		// panic(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
@@ -221,7 +220,7 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	var t MoveBody
 	err := decoder.Decode(&t)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error parsing request body:", err)
 		return
 	}

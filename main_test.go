@@ -342,8 +342,8 @@ func TestHandleAddRequest_NonExistentFreezer(t *testing.T) {
 
 	handleAddRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for nonexistent freezer, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for nonexistent freezer, got %d", rec.Code)
 	}
 }
 
@@ -357,8 +357,8 @@ func TestHandleAddRequest_InvalidJSON(t *testing.T) {
 
 	handleAddRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for invalid JSON, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for invalid JSON, got %d", rec.Code)
 	}
 }
 
@@ -372,8 +372,8 @@ func TestHandleAddRequest_EmptyBody(t *testing.T) {
 
 	handleAddRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for empty body, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for empty body, got %d", rec.Code)
 	}
 }
 
@@ -474,8 +474,8 @@ func TestHandleRemoveRequest_InvalidJSON(t *testing.T) {
 
 	handleRemoveRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for invalid JSON, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for invalid JSON, got %d", rec.Code)
 	}
 }
 
@@ -593,8 +593,8 @@ func TestHandleMoveRequest_InvalidJSON(t *testing.T) {
 
 	handleMoveRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for invalid JSON, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for invalid JSON, got %d", rec.Code)
 	}
 }
 
