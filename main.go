@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"flag"
@@ -153,17 +154,15 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 	err = writeContents(contentsFile, contents)
 
 	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Failed to convert updated contents to JSON", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	return
-
+	w.Write(buf.Bytes())
 }
 
 // remove item from contents.json
@@ -219,16 +218,15 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 	err = writeContents(contentsFile, contents)
 
 	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Failed to convert updated contents to JSON", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	return
+	w.Write(buf.Bytes())
 }
 
 // remove item from contents.json
@@ -306,14 +304,13 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	err = writeContents(contentsFile, contents)
 
 	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Failed to convert updated contents to JSON", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	return
+	w.Write(buf.Bytes())
 }
