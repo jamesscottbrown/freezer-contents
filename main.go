@@ -101,6 +101,12 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if t.Name == "" || t.Date == "" || t.Freezer == "" || len(t.Containers) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error: missing required fields")
+		return
+	}
+
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
 
@@ -161,7 +167,14 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileMutex.Lock()
+	if t.Container == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error: missing required fields")
+		return
+	}
+
+	fileMutex.L	if t.Container == "" {
+ock()
 	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
@@ -222,6 +235,12 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error parsing request body:", err)
+		return
+	}
+
+	if t.Container == "" || t.NewFreezer == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error: missing required fields")
 		return
 	}
 
