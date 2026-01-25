@@ -1,35 +1,32 @@
-<script>
-    import {onMount} from "svelte";
-    import {state} from "$lib/stores.ts";
+<script lang="ts">
+    import { onMount } from "svelte";
+    import { appState } from "$lib/stores";
 
     import Freezer from "./Freezer.svelte";
 
-
     const url = "/state";
 
-
     const getData = () => {
-
         fetch(url)
             .then(res => res.json())
-            .then(d => $state = d);
-
+            .then(d => appState.set(d));
     }
 
-    $: console.log($state);
+    $effect(() => {
+        console.log($appState);
+    });
 
-    onMount(getData)
-
+    onMount(getData);
 </script>
 
 
 <div class="container flex flex-col gap-6">
     <h1 class="font-bold text-2xl">Freezer contents</h1>
 
-    {#if !$state}
+    {#if !$appState}
         <p>Loading...</p>
     {:else}
-        {#each $state.Freezers as freezer}
+        {#each $appState.Freezers as freezer}
             <Freezer {freezer}/>
         {/each}
     {/if}
