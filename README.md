@@ -1,6 +1,19 @@
 # Freezer Contents
 
-A webapp for inventorying food stored in one or more freezers. Tracks items across multiple containers (bowls, jars) and freezer locations.
+A webapp for inventorying food stored in one or more freezers (and/or fridges, or cupboards...).
+
+The assumption is that you can have a number of containers permanently labelled with identifiers, rather than their current contents, and use this app as an index to keep track of what each container's contents and location.
+
+
+
+## Project Structure
+
+The project has a backend written in [Go](https://go.dev/), and a frontend written in [Svelte](https://svelte.dev/).
+
+The backend is compiled to a single binary, with the web app assets embedded.
+
+It stores data in a JSON file (`contents.json`).
+
 
 ## Building
 
@@ -66,9 +79,3 @@ curl --header "Content-Type: application/json" \
   --data '{"Container": "1", "NewFreezer": "cellar freezer"}' \
   http://localhost:8080/move
 ```
-
-## Project Structure
-
-- `main.go`, `parse.go` - Go backend server
-- `ui/` - Svelte 5 frontend application
-- `contents.json` - Data storage file
