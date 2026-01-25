@@ -49,3 +49,43 @@ export function buildContainerNames(input: string, containerType: ContainerType)
             return numbers.map(n => `jar_${n}`);
     }
 }
+
+/**
+ * Parses a container name into its type and number parts.
+ * Container names can be separated by hyphen or underscore.
+ * Examples: "bowl_5" -> { type: "bowl", number: 5 }
+ *           "u-3" -> { type: "u", number: 3 }
+ *           "42" -> { type: "", number: 42 }
+ */
+export function parseContainerName(name: string): { type: string; number: number } {
+    const match = name.match(/^([a-zA-Z]*)[-_]?(\d+)$/);
+    if (match) {
+        return {
+            type: match[1] || "",
+            number: parseInt(match[2], 10)
+        };
+    }
+    // Fallback: treat entire name as type with no number
+    return { type: name, number: 0 };
+}
+
+/**
+ * Sorts container names intelligently:
+ * - First alphabetically by container type (e.g., "bowl", "jar", "u")
+ * - Then numerically by container number
+ */
+export function sortContainerNames(containers: string[]): string[] {
+    return [...containers].sort((a, b) => {
+        const parsedA = parseContainerName(a);
+        const parsedB = parseContainerName(b);
+
+        // First compare by type alphabetically
+        const typeCompare = parsedA.type.localeCompare(parsedB.type);
+        if (typeCompare !== 0) {
+            return typeCompare;
+        }
+
+        // Then compare by number numerically
+        return parsedA.number - parsedB.number;
+    });
+}
