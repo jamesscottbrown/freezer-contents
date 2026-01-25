@@ -43,7 +43,6 @@ func main() {
 	mux.HandleFunc("/add", CORS(handleAddRequest))
 
 	mux.HandleFunc("/list", handleListRequest)
-	//	mux.HandleFunc("/", handleRootRequest)
 	http.ListenAndServe(*port, mux)
 
 }
@@ -64,27 +63,9 @@ func CORS(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func handleRootRequest(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		return
-	}
-
-	handleListRequest(w, r)
-}
-
 func handleListRequest(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte(`Ok`))
-}
-
-func readState(f string) ([]byte, error) {
-	out, err := ioutil.ReadFile("contents.json")
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return out, nil
-
 }
 
 func handleStateRequest(w http.ResponseWriter, r *http.Request) {
