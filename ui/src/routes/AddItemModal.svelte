@@ -1,6 +1,7 @@
 <script lang="ts">
     import Select from "svelte-select";
     import { appState } from "$lib/stores";
+    import { buildContainerNames } from "$lib/containerNames";
 
     let { freezerName, isOpen = $bindable(false) }: { freezerName: string; isOpen: boolean } = $props();
 
@@ -78,11 +79,11 @@
         let containerNames: string[] = [];
 
         if (selectedContainerType.value === "containers"){
-            containerNames = containers.split(",").map(n => n.trim());
+            containerNames = buildContainerNames(containers, "containers");
         } else if (selectedContainerType.value === "bowls"){
-            containerNames = bowls.split(",").map(n => "bowl_" + n.trim());
+            containerNames = buildContainerNames(bowls, "bowls");
         } else if (selectedContainerType.value === "jars"){
-            containerNames = jars.split(",").map(n => "jar_" + n.trim());
+            containerNames = buildContainerNames(jars, "jars");
         } else {
             containerNames = generateContainerNames();
         }
