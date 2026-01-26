@@ -5,16 +5,18 @@
     import Freezer from "./Freezer.svelte";
     import GroupByContents from "./GroupByContents.svelte";
     import GroupByNumber from "./GroupByNumber.svelte";
+    import GroupByDate from "./GroupByDate.svelte";
 
     const url = "/state";
 
-    type TabId = "location" | "contents" | "number";
+    type TabId = "location" | "contents" | "number" | "date";
     let activeTab: TabId = $state("location");
 
     const tabs: { id: TabId; label: string }[] = [
         { id: "location", label: "Group by Location" },
         { id: "contents", label: "Group by Contents" },
         { id: "number", label: "Group by Label" },
+        { id: "date", label: "Sort by Date" },
     ];
 
     const getData = () => {
@@ -50,16 +52,18 @@
     </div>
 
     <div id="tab-panel" role="tabpanel" aria-labelledby="tab-{activeTab}">
-        {#if !$appState}
-            <p aria-live="polite" aria-busy="true">Loading...</p>
-        {:else if activeTab === "location"}
-            {#each $appState.Freezers as freezer}
-                <Freezer {freezer}/>
-            {/each}
-        {:else if activeTab === "contents"}
-            <GroupByContents />
-        {:else if activeTab === "number"}
-            <GroupByNumber />
-        {/if}
+      {#if !$appState}
+          <p>Loading...</p>
+      {:else if activeTab === "location"}
+          {#each $appState.Freezers as freezer}
+              <Freezer {freezer}/>
+          {/each}
+      {:else if activeTab === "contents"}
+          <GroupByContents />
+      {:else if activeTab === "number"}
+          <GroupByNumber />
+      {:else if activeTab === "date"}
+          <GroupByDate />
+      {/if}
     </div>
 </div>
