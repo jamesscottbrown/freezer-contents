@@ -177,8 +177,8 @@ func TestWriteContents_InvalidPath(t *testing.T) {
 // ============== Tests for CORS middleware ==============
 
 func TestCORS_AddsHeaders(t *testing.T) {
-	handler := CORS(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
+	handler := CORS(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -221,9 +221,9 @@ func TestCORS_OptionsRequest(t *testing.T) {
 
 func TestCORS_PassesThroughNonOptions(t *testing.T) {
 	handlerCalled := false
-	handler := CORS(func(w http.ResponseWriter, r *http.Request) {
+	handler := CORS(func(w http.ResponseWriter, _ *http.Request) {
 		handlerCalled = true
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	req := httptest.NewRequest(http.MethodPost, "/test", nil)
@@ -273,7 +273,10 @@ func TestHandleStateRequest_MissingFile(t *testing.T) {
 	handleStateRequest(rec, req)
 
 	// The handler doesn't set error status for missing file, it just returns empty response
-	// This is a known issue in the original code
+	// This is a known limitation - verify it returns 200 with empty/null body
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
 }
 
 // ============== Tests for handleAddRequest ==============
@@ -439,7 +442,9 @@ func TestHandleRemoveRequest_RemoveLastContainer(t *testing.T) {
 	handleRemoveRequest(rec, req)
 
 	var state State
-	json.Unmarshal(rec.Body.Bytes(), &state)
+	if err := json.Unmarshal(rec.Body.Bytes(), &state); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	// The item should be removed entirely
 	if len(state.Freezers[0].Contents) != 0 {
@@ -501,7 +506,9 @@ func TestHandleMoveRequest_Success(t *testing.T) {
 	}
 
 	var state State
-	json.Unmarshal(rec.Body.Bytes(), &state)
+	if err := json.Unmarshal(rec.Body.Bytes(), &state); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	// Verify container moved from freezer1 to freezer2
 	for _, freezer := range state.Freezers {
@@ -569,7 +576,9 @@ func TestHandleMoveRequest_ConsolidateItems(t *testing.T) {
 	handleMoveRequest(rec, req)
 
 	var state State
-	json.Unmarshal(rec.Body.Bytes(), &state)
+	if err := json.Unmarshal(rec.Body.Bytes(), &state); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	// Verify containers are consolidated
 	for _, freezer := range state.Freezers {
@@ -632,7 +641,9 @@ func TestHandleMoveRequest_MoveLastContainer(t *testing.T) {
 	handleMoveRequest(rec, req)
 
 	var state State
-	json.Unmarshal(rec.Body.Bytes(), &state)
+	if err := json.Unmarshal(rec.Body.Bytes(), &state); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	// Verify source freezer is empty
 	for _, freezer := range state.Freezers {

@@ -6,8 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 )
 
 //go:embed ui/build/*
@@ -38,9 +39,8 @@ func main() {
 	mux.HandleFunc("/add", CORS(handleAddRequest))
 
 	mux.HandleFunc("/list", handleListRequest)
-	//	mux.HandleFunc("/", handleRootRequest)
-	http.ListenAndServe(*port, mux)
 
+	log.Fatal(http.ListenAndServe(*port, mux))
 }
 
 func CORS(next http.HandlerFunc) http.HandlerFunc {
@@ -59,39 +59,19 @@ func CORS(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func handleRootRequest(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		return
-	}
-
-	handleListRequest(w, r)
-}
-
 func handleListRequest(w http.ResponseWriter, r *http.Request) {
-
-	w.Write([]byte(`Ok`))
-}
-
-func readState(f string) ([]byte, error) {
-	out, err := ioutil.ReadFile("contents.json")
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return out, nil
-
+	_, _ = w.Write([]byte(`Ok`))
 }
 
 func handleStateRequest(w http.ResponseWriter, r *http.Request) {
 	// read the contents.json file
-	out, err := ioutil.ReadFile(contentsFile)
+	out, err := os.ReadFile(contentsFile)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(out))
-	return
+	_, _ = w.Write(out)
 }
 
 type AddBody struct {
@@ -141,19 +121,19 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 
 	// save JSON to file
 	err = writeContents(contentsFile, contents)
-
-	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Failed to convert updated contents to JSON", err)
+		fmt.Println("Error writing contents file:", err)
 		return
 	}
 
+	// return the json
 	w.Header().Set("Content-Type", "application/json")
-	return
-
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(contents)
+	if err != nil {
+		fmt.Println("Failed to convert updated contents to JSON", err)
+	}
 }
 
 // remove item from contents.json
@@ -204,21 +184,22 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 
 	// save JSON to file
 	err = writeContents(contentsFile, contents)
-
-	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Failed to convert updated contents to JSON", err)
+		fmt.Println("Error writing contents file:", err)
 		return
 	}
 
+	// return the json
 	w.Header().Set("Content-Type", "application/json")
-	return
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(contents)
+	if err != nil {
+		fmt.Println("Failed to convert updated contents to JSON", err)
+	}
 }
 
-// remove item from contents.json
+// move item from one freezer to another
 type MoveBody struct {
 	Container  string
 	NewFreezer string
@@ -288,16 +269,17 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 
 	// save JSON to file
 	err = writeContents(contentsFile, contents)
-
-	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Failed to convert updated contents to JSON", err)
+		fmt.Println("Error writing contents file:", err)
 		return
 	}
 
+	// return the json
 	w.Header().Set("Content-Type", "application/json")
-	return
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(contents)
+	if err != nil {
+		fmt.Println("Failed to convert updated contents to JSON", err)
+	}
 }
