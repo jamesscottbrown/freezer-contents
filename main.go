@@ -196,6 +196,7 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 				// remove container
 				if container == t.Container {
 					contents.Freezers[i].Contents[j].Containers = append(contents.Freezers[i].Contents[j].Containers[:k], contents.Freezers[i].Contents[j].Containers[k+1:]...)
+					break // stop iterating to avoid index out of bounds on modified slice
 				}
 			}
 
@@ -268,6 +269,7 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 				if container == t.Container {
 					moveItem = contents.Freezers[i].Contents[j]
 					contents.Freezers[i].Contents[j].Containers = append(contents.Freezers[i].Contents[j].Containers[:k], contents.Freezers[i].Contents[j].Containers[k+1:]...)
+					break // stop iterating to avoid index out of bounds on modified slice
 				}
 			}
 
