@@ -13,10 +13,10 @@
     let activeTab: TabId = $state("location");
 
     const tabs: { id: TabId; label: string }[] = [
-        { id: "location", label: "Group by Location" },
-        { id: "contents", label: "Group by Contents" },
-        { id: "number", label: "Group by Label" },
-        { id: "date", label: "Sort by Date" },
+        { id: "location", label: "Location" },
+        { id: "contents", label: "Contents" },
+        { id: "number", label: "Label" },
+        { id: "date", label: "Date" },
     ];
 
     const getData = () => {
@@ -36,14 +36,15 @@
 <div class="container flex flex-col gap-6">
     <h1 class="font-bold text-2xl">Freezer contents</h1>
 
-    <div class="flex gap-2 border-b border-gray-300" role="tablist" aria-label="View options">
+    <div class="flex items-center gap-2" role="tablist" aria-label="View options">
+        <span class="text-gray-600 py-2">Group by</span>
         {#each tabs as tab}
             <button
                 role="tab"
                 aria-selected={activeTab === tab.id}
                 aria-controls="tab-panel"
                 id="tab-{tab.id}"
-                class="px-4 py-2 -mb-px {activeTab === tab.id ? 'border-b-2 border-blue-500 font-bold' : 'text-gray-600 hover:text-gray-800'}"
+                class="px-4 py-2 -mb-px {activeTab === tab.id ? 'border-b-2 border-blue-500 font-bold' : 'border-b border-gray-300 text-gray-600 hover:text-gray-800'}"
                 onclick={() => activeTab = tab.id}
             >
                 {tab.label}
