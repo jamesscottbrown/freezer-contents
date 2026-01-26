@@ -5,23 +5,33 @@
 
     let { freezerName, isOpen = $bindable(false) }: { freezerName: string; isOpen: boolean } = $props();
 
-    type ContainerType = {
+    type SelectOption = {
         value: string;
         label: string;
+        prefix?: string;
     };
 
-    const containerTypes: ContainerType[] = [
-        { value: "containers", label: "Containers" },
-        { value: "bowls", label: "Bowls" },
-        { value: "jars", label: "Jars" },
+    // Build container type options from state, plus always add "numContainers"
+    const containerTypeOptions = $derived<SelectOption[]>([
+        ...($appState?.ContainerTypes ?? []).map(ct => ({
+            value: ct.Value,
+            label: ct.Label,
+            prefix: ct.Prefix
+        })),
         { value: "numContainers", label: "Other (unlabelled)" }
-    ];
+    ]);
 
-    let selectedContainerType: ContainerType = $state(containerTypes[0]);
+    let selectedContainerType: SelectOption = $state({ value: "", label: "" });
+
+    // Set default selection when options become available
+    $effect(() => {
+        if (containerTypeOptions.length > 0 && !selectedContainerType.value) {
+            selectedContainerType = containerTypeOptions[0];
+        }
+    });
+
     let itemName = $state("");
-    let containers = $state("");
-    let bowls = $state("");
-    let jars = $state("");
+    let containerInput = $state("");
     let numContainers = $state("");
     let dialogEl: HTMLDialogElement;
 
@@ -66,11 +76,11 @@
 
     const clearFields = () => {
         itemName = "";
-        containers = "";
-        bowls = "";
-        jars = "";
+        containerInput = "";
         numContainers = "";
-        selectedContainerType = containerTypes[0];
+        if (containerTypeOptions.length > 0) {
+            selectedContainerType = containerTypeOptions[0];
+        }
     }
 
     const addItem = () => {
@@ -78,14 +88,10 @@
 
         let containerNames: string[] = [];
 
-        if (selectedContainerType.value === "containers"){
-            containerNames = buildContainerNames(containers, "containers");
-        } else if (selectedContainerType.value === "bowls"){
-            containerNames = buildContainerNames(bowls, "bowls");
-        } else if (selectedContainerType.value === "jars"){
-            containerNames = buildContainerNames(jars, "jars");
-        } else {
+        if (selectedContainerType.value === "numContainers") {
             containerNames = generateContainerNames();
+        } else {
+            containerNames = buildContainerNames(containerInput, selectedContainerType.prefix ?? "");
         }
 
         fetch(url, {
@@ -144,7 +150,7 @@
         <div class="flex flex-col pl-2">
             <span id="containerType-label">Container Type:</span>
             <Select
-                items={containerTypes}
+                items={containerTypeOptions}
                 value={selectedContainerType}
                 on:change={(e) => selectedContainerType = e.detail}
                 clearable={false}
@@ -154,18 +160,12 @@
         </div>
 
         <div class="flex flex-col pl-2">
-            {#if selectedContainerType.value === "containers"}
-                <label for="containers">Numbers (comma-separated):</label>
-                <input type="text" id="containers" class="form-input" bind:value={containers}/>
-            {:else if selectedContainerType.value === "bowls"}
-                <label for="bowls">Numbers (comma-separated):</label>
-                <input type="text" id="bowls" class="form-input" bind:value={bowls}/>
-            {:else if selectedContainerType.value === "jars"}
-                <label for="jars">Numbers (comma-separated):</label>
-                <input type="text" id="jars" class="form-input" bind:value={jars}/>
-            {:else if selectedContainerType.value === "numContainers"}
+            {#if selectedContainerType.value === "numContainers"}
                 <label for="numContainers">Number of unlabelled containers:</label>
                 <input type="text" id="numContainers" class="form-input" bind:value={numContainers}/>
+            {:else}
+                <label for="containerInput">Numbers (comma-separated):</label>
+                <input type="text" id="containerInput" class="form-input" bind:value={containerInput}/>
             {/if}
         </div>
 

@@ -51,40 +51,40 @@ describe('parseNumberInput', () => {
 });
 
 describe('buildContainerNames', () => {
-    describe('containers type', () => {
+    describe('with empty prefix', () => {
         it('should return string numbers', () => {
-            expect(buildContainerNames('1,2,3', 'containers')).toEqual(['1', '2', '3']);
+            expect(buildContainerNames('1,2,3', '')).toEqual(['1', '2', '3']);
         });
 
         it('should handle ranges', () => {
-            expect(buildContainerNames('1,3-5,7', 'containers')).toEqual(['1', '3', '4', '5', '7']);
+            expect(buildContainerNames('1,3-5,7', '')).toEqual(['1', '3', '4', '5', '7']);
         });
     });
 
-    describe('bowls type', () => {
+    describe('with bowl_ prefix', () => {
         it('should prefix with bowl_', () => {
-            expect(buildContainerNames('1,2,3', 'bowls')).toEqual(['bowl_1', 'bowl_2', 'bowl_3']);
+            expect(buildContainerNames('1,2,3', 'bowl_')).toEqual(['bowl_1', 'bowl_2', 'bowl_3']);
         });
 
         it('should handle ranges', () => {
-            expect(buildContainerNames('1,3-5', 'bowls')).toEqual(['bowl_1', 'bowl_3', 'bowl_4', 'bowl_5']);
+            expect(buildContainerNames('1,3-5', 'bowl_')).toEqual(['bowl_1', 'bowl_3', 'bowl_4', 'bowl_5']);
         });
     });
 
-    describe('jars type', () => {
+    describe('with jar_ prefix', () => {
         it('should prefix with jar_', () => {
-            expect(buildContainerNames('1,2,3', 'jars')).toEqual(['jar_1', 'jar_2', 'jar_3']);
+            expect(buildContainerNames('1,2,3', 'jar_')).toEqual(['jar_1', 'jar_2', 'jar_3']);
         });
 
         it('should handle ranges', () => {
-            expect(buildContainerNames('1,3-5', 'jars')).toEqual(['jar_1', 'jar_3', 'jar_4', 'jar_5']);
+            expect(buildContainerNames('1,3-5', 'jar_')).toEqual(['jar_1', 'jar_3', 'jar_4', 'jar_5']);
         });
     });
 
     it('should return empty array for empty input', () => {
-        expect(buildContainerNames('', 'containers')).toEqual([]);
-        expect(buildContainerNames('', 'bowls')).toEqual([]);
-        expect(buildContainerNames('', 'jars')).toEqual([]);
+        expect(buildContainerNames('', '')).toEqual([]);
+        expect(buildContainerNames('', 'bowl_')).toEqual([]);
+        expect(buildContainerNames('', 'jar_')).toEqual([]);
     });
 });
 

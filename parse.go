@@ -6,9 +6,16 @@ import (
 	"os"
 )
 
+type ContainerType struct {
+	Value  string
+	Label  string
+	Prefix string
+}
+
 type State struct {
-	Containers []string
-	Freezers   []Freezer
+	ContainerTypes []ContainerType
+	Containers     []string
+	Freezers       []Freezer
 }
 
 type Freezer struct {

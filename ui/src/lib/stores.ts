@@ -11,7 +11,14 @@ export interface Freezer {
     Contents: FreezerItem[];
 }
 
+export interface ContainerType {
+    Value: string;
+    Label: string;
+    Prefix: string;
+}
+
 export interface AppState {
+    ContainerTypes: ContainerType[];
     Freezers: Freezer[];
 }
 

@@ -1,4 +1,9 @@
 {
+  "ContainerTypes": [
+    { "Value": "containers", "Label": "Containers", "Prefix": "" },
+    { "Value": "bowls", "Label": "Bowls", "Prefix": "bowl_" },
+    { "Value": "jars", "Label": "Jars", "Prefix": "jar_" }
+  ],
   "Containers": [
     "1",
     "2",
