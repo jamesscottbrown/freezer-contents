@@ -1,0 +1,37 @@
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck       # Check for unchecked errors
+    - govet          # Report suspicious constructs
+    - ineffassign    # Detect unused variable assignments
+    - staticcheck    # Static analysis checks (includes gosimple)
+    - unused         # Find unused code
+    - bodyclose      # Check whether HTTP response body is closed
+    - misspell       # Find misspelled English words
+    - unconvert      # Remove unnecessary type conversions
+    - unparam        # Find unused function parameters
+  settings:
+    errcheck:
+      check-type-assertions: true
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment  # Too strict for this project
+
+formatters:
+  enable:
+    - gofmt          # Check code formatting
+    - goimports      # Check imports ordering
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/jamesscottbrown/freezer-contents
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

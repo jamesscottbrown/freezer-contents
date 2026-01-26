@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -24,14 +23,14 @@ type Item struct {
 }
 
 func readContents(f string) (State, error) {
-	jsonString, err := ioutil.ReadFile(f)
+	jsonBytes, err := os.ReadFile(f)
 	if err != nil {
 		fmt.Println("Error reading file:", err)
 		return State{}, err
 	}
 
 	var state State
-	err = json.Unmarshal([]byte(jsonString), &state)
+	err = json.Unmarshal(jsonBytes, &state)
 	if err != nil {
 		fmt.Println("Error parsing file:", err)
 		return State{}, err
@@ -55,7 +54,11 @@ func writeContents(f string, state State) error {
 		fmt.Println("Error creating file", err)
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			fmt.Println("Error closing file:", cerr)
+		}
+	}()
 
 	_, err = file.Write(jsonData)
 	if err != nil {
