@@ -345,8 +345,8 @@ func TestHandleAddRequest_NonExistentFreezer(t *testing.T) {
 
 	handleAddRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for nonexistent freezer, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for nonexistent freezer, got %d", rec.Code)
 	}
 }
 
@@ -360,8 +360,8 @@ func TestHandleAddRequest_InvalidJSON(t *testing.T) {
 
 	handleAddRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for invalid JSON, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for invalid JSON, got %d", rec.Code)
 	}
 }
 
@@ -375,8 +375,8 @@ func TestHandleAddRequest_EmptyBody(t *testing.T) {
 
 	handleAddRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for empty body, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for empty body, got %d", rec.Code)
 	}
 }
 
@@ -479,8 +479,62 @@ func TestHandleRemoveRequest_InvalidJSON(t *testing.T) {
 
 	handleRemoveRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for invalid JSON, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for invalid JSON, got %d", rec.Code)
+	}
+}
+
+func TestHandleRemoveRequest_DuplicateContainers(t *testing.T) {
+	// This test verifies that removing a container from an item with duplicate
+	// container names does not panic due to slice index out of bounds.
+	// The fix removes one instance per request, so ["1", "1"] becomes ["1"].
+	// The names *should* be unique, so this shouldn't ever happen, but better to be safe than sorry...
+	stateWithDuplicates := `{
+		"Containers": ["1", "1"],
+		"Freezers": [{
+			"Name": "freezer1",
+			"Contents": [{
+				"Name": "item with duplicates",
+				"Date": "2024-01-01",
+				"Containers": ["1", "1"]
+			}]
+		}]
+	}`
+	cleanup := setupTestEnv(t, stateWithDuplicates)
+	defer cleanup()
+
+	body := RemoveBody{Container: "1"}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/remove", bytes.NewReader(bodyBytes))
+	rec := httptest.NewRecorder()
+
+	// This should not panic
+	handleRemoveRequest(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
+
+	var state State
+	err := json.Unmarshal(rec.Body.Bytes(), &state)
+	if err != nil {
+		t.Fatalf("Response is not valid JSON: %v", err)
+	}
+
+	// Verify one container "1" was removed (one should remain)
+	containerCount := 0
+	for _, freezer := range state.Freezers {
+		for _, item := range freezer.Contents {
+			for _, container := range item.Containers {
+				if container == "1" {
+					containerCount++
+				}
+			}
+		}
+	}
+	if containerCount != 1 {
+		t.Errorf("Expected 1 container '1' to remain after removing one duplicate, got %d", containerCount)
 	}
 }
 
@@ -602,8 +656,71 @@ func TestHandleMoveRequest_InvalidJSON(t *testing.T) {
 
 	handleMoveRequest(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for invalid JSON, got %d", rec.Code)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for invalid JSON, got %d", rec.Code)
+	}
+}
+
+func TestHandleMoveRequest_DuplicateContainers(t *testing.T) {
+	// This test verifies that moving a container from an item with duplicate
+	// container names does not panic due to slice index out of bounds.
+	stateWithDuplicates := `{
+		"Containers": ["1", "1"],
+		"Freezers": [
+			{
+				"Name": "freezer1",
+				"Contents": [{
+					"Name": "item with duplicates",
+					"Date": "2024-01-01",
+					"Containers": ["1", "1"]
+				}]
+			},
+			{
+				"Name": "freezer2",
+				"Contents": []
+			}
+		]
+	}`
+	cleanup := setupTestEnv(t, stateWithDuplicates)
+	defer cleanup()
+
+	body := MoveBody{
+		Container:  "1",
+		NewFreezer: "freezer2",
+	}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/move", bytes.NewReader(bodyBytes))
+	rec := httptest.NewRecorder()
+
+	// This should not panic
+	handleMoveRequest(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
+
+	var state State
+	err := json.Unmarshal(rec.Body.Bytes(), &state)
+	if err != nil {
+		t.Fatalf("Response is not valid JSON: %v", err)
+	}
+
+	// Verify container was moved to freezer2
+	found := false
+	for _, freezer := range state.Freezers {
+		if freezer.Name == "freezer2" {
+			for _, item := range freezer.Contents {
+				for _, container := range item.Containers {
+					if container == "1" {
+						found = true
+					}
+				}
+			}
+		}
+	}
+	if !found {
+		t.Error("Container 1 should have been moved to freezer2")
 	}
 }
 
