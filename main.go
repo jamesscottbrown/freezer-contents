@@ -1,13 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
+	"os"
 	"net/http"
+	"sync"
 )
 
 //go:embed ui/build/*
@@ -15,6 +17,9 @@ var ui embed.FS
 
 // contentsFile is the path to the contents JSON file. It can be overridden for testing.
 var contentsFile = "contents.json"
+
+// fileMutex protects concurrent access to the contents file.
+var fileMutex sync.Mutex
 
 func main() {
 
@@ -38,7 +43,6 @@ func main() {
 	mux.HandleFunc("/add", CORS(handleAddRequest))
 
 	mux.HandleFunc("/list", handleListRequest)
-	//	mux.HandleFunc("/", handleRootRequest)
 	http.ListenAndServe(*port, mux)
 
 }
@@ -59,32 +63,17 @@ func CORS(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func handleRootRequest(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		return
-	}
-
-	handleListRequest(w, r)
-}
-
 func handleListRequest(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte(`Ok`))
 }
 
-func readState(f string) ([]byte, error) {
-	out, err := ioutil.ReadFile("contents.json")
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return out, nil
-
-}
-
 func handleStateRequest(w http.ResponseWriter, r *http.Request) {
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+
 	// read the contents.json file
-	out, err := ioutil.ReadFile(contentsFile)
+	out, err := os.ReadFile(contentsFile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -107,10 +96,19 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 	var t AddBody
 	err := decoder.Decode(&t)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
+
+	if t.Name == "" || t.Date == "" || t.Freezer == "" || len(t.Containers) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error: missing required fields")
+		return
+	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
 	if err != nil {
@@ -127,7 +125,7 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !freezerExists {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error: freezer does not exist")
 		return
 	}
@@ -143,17 +141,15 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 	err = writeContents(contentsFile, contents)
 
 	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Failed to convert updated contents to JSON", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	return
-
+	w.Write(buf.Bytes())
 }
 
 // remove item from contents.json
@@ -166,11 +162,19 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 	var t RemoveBody
 	err := decoder.Decode(&t)
 	if err != nil {
-		// panic(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
+
+	if t.Container == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error: missing required fields")
+		return
+	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
 	if err != nil {
@@ -192,6 +196,7 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 				// remove container
 				if container == t.Container {
 					contents.Freezers[i].Contents[j].Containers = append(contents.Freezers[i].Contents[j].Containers[:k], contents.Freezers[i].Contents[j].Containers[k+1:]...)
+					break // stop iterating to avoid index out of bounds on modified slice
 				}
 			}
 
@@ -206,16 +211,15 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 	err = writeContents(contentsFile, contents)
 
 	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Failed to convert updated contents to JSON", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	return
+	w.Write(buf.Bytes())
 }
 
 // remove item from contents.json
@@ -229,10 +233,19 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	var t MoveBody
 	err := decoder.Decode(&t)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error parsing request body:", err)
 		return
 	}
+
+	if t.Container == "" || t.NewFreezer == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error: missing required fields")
+		return
+	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	contents, err := readContents(contentsFile)
 	if err != nil {
@@ -256,6 +269,7 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 				if container == t.Container {
 					moveItem = contents.Freezers[i].Contents[j]
 					contents.Freezers[i].Contents[j].Containers = append(contents.Freezers[i].Contents[j].Containers[:k], contents.Freezers[i].Contents[j].Containers[k+1:]...)
+					break // stop iterating to avoid index out of bounds on modified slice
 				}
 			}
 
@@ -290,14 +304,13 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	err = writeContents(contentsFile, contents)
 
 	// return the json
-	json := json.NewEncoder(w)
-	err = json.Encode(contents)
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(contents)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Failed to convert updated contents to JSON", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	return
+	w.Write(buf.Bytes())
 }
