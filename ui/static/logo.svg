@@ -1,0 +1,42 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="120" height="120" rx="24" fill="#4A90E2"></rect>
+                        <!-- Center vertical line -->
+                        <path d="M60 30 L60 90" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <!-- Top and bottom arrows -->
+                        <path d="M60 30 L55 36 M60 30 L65 36" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <path d="M60 90 L55 84 M60 90 L65 84" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        
+                        <!-- Center horizontal line -->
+                        <path d="M30 60 L90 60" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <!-- Left and right arrows -->
+                        <path d="M30 60 L36 55 M30 60 L36 65" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <path d="M90 60 L84 55 M90 60 L84 65" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        
+                        <!-- Diagonal line top-left to bottom-right -->
+                        <path d="M42 42 L78 78" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <path d="M42 42 L45 48 M42 42 L48 45" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <path d="M78 78 L75 72 M78 78 L72 75" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        
+                        <!-- Diagonal line top-right to bottom-left -->
+                        <path d="M78 42 L42 78" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <path d="M78 42 L72 45 M78 42 L75 48" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        <path d="M42 78 L48 75 M42 78 L45 72" stroke="white" stroke-width="3.5" stroke-linecap="round"></path>
+                        
+                        <!-- Checklist items -->
+                        <g transform="translate(82, 18)">
+                            <!-- Item 1 -->
+                            <circle cx="4" cy="4" r="3.5" fill="white" stroke="#4A90E2" stroke-width="1"></circle>
+                            <path d="M2 4 L3.5 5.5 L6 2.5" stroke="#4A90E2" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10 3 Q12 3.5 14 3 Q16 4 18 3.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+                            
+                            <!-- Item 2 -->
+                            <circle cx="4" cy="12" r="3.5" fill="white" stroke="#4A90E2" stroke-width="1"></circle>
+                            <path d="M2 12 L3.5 13.5 L6 10.5" stroke="#4A90E2" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10 11 Q12 11.5 14 11 Q16 12 18 11.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+                            
+                            <!-- Item 3 -->
+                            <circle cx="4" cy="20" r="3.5" fill="white" stroke="#4A90E2" stroke-width="1"></circle>
+                            <path d="M2 20 L3.5 21.5 L6 18.5" stroke="#4A90E2" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10 19 Q12 19.5 14 19 Q16 20 18 19.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+                        </g>
+                    </svg>
