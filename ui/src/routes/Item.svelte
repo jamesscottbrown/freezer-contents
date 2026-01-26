@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { appState } from "$lib/stores";
+    import { appState, type FreezerItem } from "$lib/stores";
     import { sortContainerNames } from "$lib/containerNames";
 
-    let { item, freezerName }: { item: any; freezerName: string } = $props();
+    let { item, freezerName }: { item: FreezerItem; freezerName: string } = $props();
 
     let selectedContainer: string | undefined = $state(undefined);
     let dialogEl: HTMLDialogElement;

@@ -1,8 +1,9 @@
 <script lang="ts">
     import Item from "./Item.svelte";
     import AddItemModal from "./AddItemModal.svelte";
+    import type { Freezer } from "$lib/stores";
 
-    let { freezer }: { freezer: any } = $props();
+    let { freezer }: { freezer: Freezer } = $props();
     let addModalIsOpen = $state(false);
 </script>
 
