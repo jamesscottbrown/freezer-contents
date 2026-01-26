@@ -33,7 +33,7 @@
 </script>
 
 
-<div class="container flex flex-col gap-6">
+<div class="container flex flex-col gap-6 pt-4">
     <h1 class="font-bold text-2xl">Freezer contents</h1>
 
     <div class="flex items-center gap-2" role="tablist" aria-label="View options">
