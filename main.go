@@ -7,8 +7,9 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
-	"os"
+	"log"
 	"net/http"
+	"os"
 	"sync"
 )
 
@@ -43,8 +44,8 @@ func main() {
 	mux.HandleFunc("/add", CORS(handleAddRequest))
 
 	mux.HandleFunc("/list", handleListRequest)
-	http.ListenAndServe(*port, mux)
 
+	log.Fatal(http.ListenAndServe(*port, mux))
 }
 
 func CORS(next http.HandlerFunc) http.HandlerFunc {
@@ -64,8 +65,7 @@ func CORS(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func handleListRequest(w http.ResponseWriter, r *http.Request) {
-
-	w.Write([]byte(`Ok`))
+	_, _ = w.Write([]byte(`Ok`))
 }
 
 func handleStateRequest(w http.ResponseWriter, r *http.Request) {
@@ -79,8 +79,7 @@ func handleStateRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(out))
-	return
+	_, _ = w.Write(out)
 }
 
 type AddBody struct {
@@ -139,6 +138,11 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 
 	// save JSON to file
 	err = writeContents(contentsFile, contents)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error writing contents file:", err)
+		return
+	}
 
 	// return the json
 	var buf bytes.Buffer
@@ -149,7 +153,7 @@ func handleAddRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(buf.Bytes())
+	_, _ = w.Write(buf.Bytes())
 }
 
 // remove item from contents.json
@@ -209,6 +213,11 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 
 	// save JSON to file
 	err = writeContents(contentsFile, contents)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error writing contents file:", err)
+		return
+	}
 
 	// return the json
 	var buf bytes.Buffer
@@ -219,10 +228,10 @@ func handleRemoveRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(buf.Bytes())
+	_, _ = w.Write(buf.Bytes())
 }
 
-// remove item from contents.json
+// move item from one freezer to another
 type MoveBody struct {
 	Container  string
 	NewFreezer string
@@ -302,6 +311,11 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 
 	// save JSON to file
 	err = writeContents(contentsFile, contents)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error writing contents file:", err)
+		return
+	}
 
 	// return the json
 	var buf bytes.Buffer
@@ -312,5 +326,5 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(buf.Bytes())
+	_, _ = w.Write(buf.Bytes())
 }

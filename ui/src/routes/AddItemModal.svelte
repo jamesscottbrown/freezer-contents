@@ -113,9 +113,10 @@
     class="p-0 backdrop:bg-black backdrop:bg-opacity-40 max-w-md w-full"
     onclick={(e) => { if (e.target === dialogEl) closeDialog(); }}
     onclose={closeDialog}
+    aria-labelledby="add-item-dialog-title"
 >
     <div class="bg-core-grey-600 text-white p-2 relative">
-        <h2 class="font-bold">Add Item to {freezerName}</h2>
+        <h2 id="add-item-dialog-title" class="font-bold">Add Item to {freezerName}</h2>
         <button
             onclick={closeDialog}
             class="bg-core-grey-500 absolute top-2 right-2 hover:bg-core-grey-800"
@@ -141,13 +142,14 @@
         </div>
 
         <div class="flex flex-col pl-2">
-            <label for="containerType">Container Type:</label>
+            <span id="containerType-label">Container Type:</span>
             <Select
                 items={containerTypes}
                 value={selectedContainerType}
                 on:change={(e) => selectedContainerType = e.detail}
                 clearable={false}
                 searchable={false}
+                ariaAttributes={{ 'aria-labelledby': 'containerType-label' }}
             />
         </div>
 

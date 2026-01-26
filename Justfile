@@ -16,6 +16,10 @@ ui-build:
 go-build:
     CGO_ENABLED=0 go build .
 
+# Run Go linter
+lint:
+    golangci-lint run
+
 # Preview/run the application
 preview:
     go run .

@@ -59,7 +59,8 @@
     <span>{item.Name} ({item.Date})</span>
     {#each sortContainerNames(item.Containers) as container}
         <button onclick={() => openDialog(container)}
-                class="px-2 border border-grey-500 rounded">{container}</button>
+                class="px-2 border border-grey-500 rounded"
+                aria-label="Edit container {container} for {item.Name}">{container}</button>
     {/each}
 </div>
 
@@ -68,9 +69,10 @@
     bind:this={dialogEl}
     class="p-0 backdrop:bg-black backdrop:bg-opacity-40 max-w-md w-full"
     onclick={(e) => { if (e.target === dialogEl) closeDialog(); }}
+    aria-labelledby="edit-item-dialog-title"
 >
     <div class="bg-core-grey-600 text-white p-2 relative">
-        <h2 class="font-bold">Edit {item.Name} ({item.Date})</h2>
+        <h2 id="edit-item-dialog-title" class="font-bold">Edit {item.Name} ({item.Date})</h2>
         <button
             onclick={closeDialog}
             class="bg-core-grey-500 absolute top-2 right-2 hover:bg-core-grey-800"
