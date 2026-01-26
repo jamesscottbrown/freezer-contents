@@ -155,7 +155,6 @@
                 on:change={(e) => selectedContainerType = e.detail}
                 clearable={false}
                 searchable={false}
-                ariaAttributes={{ 'aria-labelledby': 'containerType-label' }}
             />
         </div>
 
