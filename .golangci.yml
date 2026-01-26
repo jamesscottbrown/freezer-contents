@@ -33,6 +33,8 @@ formatters-settings:
   goimports:
     local-prefixes:
       - github.com/jamesscottbrown/freezer-contents
+  misspell:
+    locale: US
 
 issues:
   exclude-use-default: false
