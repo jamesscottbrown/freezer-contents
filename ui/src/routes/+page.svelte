@@ -25,10 +25,6 @@
             .then(d => appState.set(d));
     }
 
-    $effect(() => {
-        console.log($appState);
-    });
-
     onMount(getData);
 </script>
 
