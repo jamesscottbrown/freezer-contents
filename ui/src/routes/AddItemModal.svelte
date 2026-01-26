@@ -1,9 +1,11 @@
 <script lang="ts">
     import Select from "svelte-select";
-    import { appState } from "$lib/stores";
+    import { appState, errorMessage, loadingState, clearErrorAfterDelay } from "$lib/stores";
     import { buildContainerNames } from "$lib/containerNames";
 
     let { freezerName, isOpen = $bindable(false) }: { freezerName: string; isOpen: boolean } = $props();
+
+    let isAddingItem = $derived($loadingState.addItem);
 
     type SelectOption = {
         value: string;
@@ -83,7 +85,7 @@
         }
     }
 
-    const addItem = () => {
+    const addItem = async () => {
         const url = "/add";
 
         let containerNames: string[] = [];
@@ -94,23 +96,37 @@
             containerNames = buildContainerNames(containerInput, selectedContainerType.prefix ?? "");
         }
 
-        fetch(url, {
-            method: "POST",
-            body: JSON.stringify({
-                Name: itemName,
-                Date: (new Date()).toISOString().slice(0,10),
-                Freezer: freezerName,
-                Containers: containerNames
+        loadingState.update(s => ({ ...s, addItem: true }));
+        errorMessage.set(null);
 
-            }),
-            headers: {
-                'Content-Type': 'application/json'
+        try {
+            const res = await fetch(url, {
+                method: "POST",
+                body: JSON.stringify({
+                    Name: itemName,
+                    Date: (new Date()).toISOString().slice(0,10),
+                    Freezer: freezerName,
+                    Containers: containerNames
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error(`Failed to add item: ${res.status} ${res.statusText}`);
             }
-        })
-            .then(res => res.json())
-            .then(d => appState.set(d));
 
-        closeDialog();
+            const d = await res.json();
+            appState.set(d);
+            closeDialog();
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to add item';
+            errorMessage.set(message);
+            clearErrorAfterDelay();
+        } finally {
+            loadingState.update(s => ({ ...s, addItem: false }));
+        }
     }
 </script>
 
@@ -168,8 +184,14 @@
             {/if}
         </div>
 
-        <button onclick={clearFields} class="px-2 border border-red-500 rounded">Clear</button>
+        <button onclick={clearFields} disabled={isAddingItem} class="px-2 border border-red-500 rounded disabled:opacity-50 disabled:cursor-not-allowed">Clear</button>
 
-        <button onclick={addItem} class="px-2 border border-green-500 rounded">Add</button>
+        <button onclick={addItem} disabled={isAddingItem} class="px-2 border border-green-500 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+            {#if isAddingItem}
+                Adding...
+            {:else}
+                Add
+            {/if}
+        </button>
     </div>
 </dialog>
