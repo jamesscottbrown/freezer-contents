@@ -29,25 +29,15 @@ export function parseNumberInput(input: string): number[] {
     return result;
 }
 
-export type ContainerType = "containers" | "bowls" | "jars";
-
 /**
  * Builds an array of container names from a number input string.
  * @param input - Comma-separated numbers with optional ranges (e.g., "1,3-5,7")
- * @param containerType - The type of container ("containers", "bowls", or "jars")
+ * @param prefix - The prefix to prepend to each container number (e.g., "", "bowl_", "jar_")
  * @returns Array of container names with appropriate prefixes
  */
-export function buildContainerNames(input: string, containerType: ContainerType): string[] {
+export function buildContainerNames(input: string, prefix: string): string[] {
     const numbers = parseNumberInput(input);
-
-    switch (containerType) {
-        case "containers":
-            return numbers.map(n => String(n));
-        case "bowls":
-            return numbers.map(n => `bowl_${n}`);
-        case "jars":
-            return numbers.map(n => `jar_${n}`);
-    }
+    return numbers.map(n => `${prefix}${n}`);
 }
 
 /**
