@@ -5,16 +5,18 @@
     import Freezer from "./Freezer.svelte";
     import GroupByContents from "./GroupByContents.svelte";
     import GroupByNumber from "./GroupByNumber.svelte";
+    import GroupByDate from "./GroupByDate.svelte";
 
     const url = "/state";
 
-    type TabId = "location" | "contents" | "number";
+    type TabId = "location" | "contents" | "number" | "date";
     let activeTab: TabId = $state("location");
 
     const tabs: { id: TabId; label: string }[] = [
         { id: "location", label: "Group by Location" },
         { id: "contents", label: "Group by Contents" },
         { id: "number", label: "Group by Label" },
+        { id: "date", label: "Sort by Date" },
     ];
 
     const getData = () => {
@@ -55,5 +57,7 @@
         <GroupByContents />
     {:else if activeTab === "number"}
         <GroupByNumber />
+    {:else if activeTab === "date"}
+        <GroupByDate />
     {/if}
 </div>
