@@ -15,28 +15,23 @@ linters:
     - misspell       # Find misspelled English words
     - unconvert      # Remove unnecessary type conversions
     - unparam        # Find unused function parameters
+  settings:
+    errcheck:
+      check-type-assertions: true
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment  # Too strict for this project
 
 formatters:
   enable:
     - gofmt          # Check code formatting
     - goimports      # Check imports ordering
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment  # Too strict for this project
-
-formatters-settings:
-  goimports:
-    local-prefixes:
-      - github.com/jamesscottbrown/freezer-contents
-  misspell:
-    locale: US
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/jamesscottbrown/freezer-contents
 
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
