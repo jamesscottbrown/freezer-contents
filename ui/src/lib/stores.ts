@@ -23,3 +23,28 @@ export interface AppState {
 }
 
 export const appState = writable<AppState | null>(null);
+
+// Error store for displaying error messages to the user
+export const errorMessage = writable<string | null>(null);
+
+// Loading states for different operations
+export interface LoadingState {
+  initialLoad: boolean;
+  addItem: boolean;
+  removeContainer: boolean;
+  moveContainer: boolean;
+}
+
+export const loadingState = writable<LoadingState>({
+  initialLoad: true,
+  addItem: false,
+  removeContainer: false,
+  moveContainer: false,
+});
+
+// Helper to clear error after a delay
+export function clearErrorAfterDelay(delayMs: number = 5000) {
+  setTimeout(() => {
+    errorMessage.set(null);
+  }, delayMs);
+}
