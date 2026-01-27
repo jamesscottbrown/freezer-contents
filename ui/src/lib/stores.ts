@@ -36,7 +36,7 @@ export interface LoadingState {
 }
 
 export const loadingState = writable<LoadingState>({
-  initialLoad: false,
+  initialLoad: true,
   addItem: false,
   removeContainer: false,
   moveContainer: false,
