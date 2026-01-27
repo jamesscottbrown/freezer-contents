@@ -93,7 +93,7 @@
     <span>{item.Name} ({item.Date})</span>
     {#each sortContainerNames(item.Containers) as container}
         <button onclick={() => openDialog(container)}
-                class="px-2 border border-grey-500 rounded"
+                class="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 active:bg-gray-300 transition-colors text-sm"
                 aria-label="Edit container {container} for {item.Name}">{container}</button>
     {/each}
 </div>
@@ -109,7 +109,7 @@
         <h2 id="edit-item-dialog-title" class="font-bold">Edit {item.Name} ({item.Date})</h2>
         <button
             onclick={closeDialog}
-            class="bg-core-grey-500 absolute top-2 right-2 hover:bg-core-grey-800"
+            class="absolute top-2 right-2 p-1 rounded-md hover:bg-white/20 active:bg-white/30 transition-colors"
         >
             <span class="sr-only">Close</span>
             <svg
@@ -131,7 +131,7 @@
         <div class="flex flex-col pl-2">
             <div>
                 <button
-                    class="px-2 border border-red-500 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     onclick={removeContainer}
                     disabled={isOperationPending}
                 >
@@ -145,7 +145,7 @@
                 {#each $appState?.Freezers ?? [] as freezer}
                     {#if freezer.Name !== freezerName}
                         <button
-                            class="px-2 border border-green-500 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             onclick={() => moveContainer(freezer.Name)}
                             disabled={isOperationPending}
                         >

@@ -70,7 +70,7 @@
                 aria-selected={activeTab === tab.id}
                 aria-controls="tab-panel"
                 id="tab-{tab.id}"
-                class="px-4 py-2 -mb-px {activeTab === tab.id ? 'border-b-2 border-blue-500 font-bold' : 'border-b border-gray-300 text-gray-600 hover:text-gray-800'}"
+                class="px-4 py-2 -mb-px transition-colors {activeTab === tab.id ? 'border-b-2 border-blue-500 font-bold' : 'border-b border-gray-300 text-gray-600 hover:text-gray-800 hover:border-blue-400'}"
                 onclick={() => activeTab = tab.id}
             >
                 {tab.label}

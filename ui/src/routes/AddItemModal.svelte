@@ -141,7 +141,7 @@
         <h2 id="add-item-dialog-title" class="font-bold">Add Item to {freezerName}</h2>
         <button
             onclick={closeDialog}
-            class="bg-core-grey-500 absolute top-2 right-2 hover:bg-core-grey-800"
+            class="absolute top-2 right-2 p-1 rounded-md hover:bg-white/20 active:bg-white/30 transition-colors"
         >
             <span class="sr-only">Close</span>
             <svg
@@ -184,9 +184,9 @@
             {/if}
         </div>
 
-        <button onclick={clearFields} disabled={isAddingItem} class="px-2 border border-red-500 rounded disabled:opacity-50 disabled:cursor-not-allowed">Clear</button>
+        <button onclick={clearFields} disabled={isAddingItem} class="px-4 py-2 border border-gray-400 text-gray-700 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Clear</button>
 
-        <button onclick={addItem} disabled={isAddingItem} class="px-2 border border-green-500 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+        <button onclick={addItem} disabled={isAddingItem} class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
             {#if isAddingItem}
                 Adding...
             {:else}
