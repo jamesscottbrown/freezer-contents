@@ -39,10 +39,6 @@
         }
     }
 
-    $effect(() => {
-        console.log($appState);
-    });
-
     onMount(getData);
 </script>
 
