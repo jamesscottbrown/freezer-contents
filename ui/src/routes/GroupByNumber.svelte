@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { appState } from "$lib/stores";
+    import { appState, type FreezerItem } from "$lib/stores";
     import { parseContainerName } from "$lib/containerNames";
+    import Item from "./Item.svelte";
 
     interface ContainerInfo {
         name: string;
         number: number;
-        itemName: string;
+        item: FreezerItem;  // Synthetic item with just this container
         freezerName: string;
     }
 
@@ -33,10 +34,15 @@
                 for (const container of item.Containers) {
                     const parsed = parseContainerName(container);
                     const existing = typeMap.get(parsed.type) || [];
+                    // Create a synthetic FreezerItem with just this single container
                     existing.push({
                         name: container,
                         number: parsed.number,
-                        itemName: item.Name,
+                        item: {
+                            Name: item.Name,
+                            Date: item.Date,
+                            Containers: [container]
+                        },
                         freezerName: freezer.Name
                     });
                     typeMap.set(parsed.type, existing);
@@ -84,7 +90,8 @@
             <ol class="list-decimal pl-6">
                 {#each group.containers as container}
                     <li value={container.number}>
-                        {container.name}: {container.itemName} <span class="text-gray-500">({container.freezerName})</span>
+                        <span class="text-gray-500">({container.freezerName})</span>
+                        <Item item={container.item} freezerName={container.freezerName} />
                     </li>
                 {/each}
             </ol>

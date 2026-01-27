@@ -1,42 +1,42 @@
 <script lang="ts">
-    import { appState } from "$lib/stores";
-    import { sortContainerNames } from "$lib/containerNames";
+    import { appState, type FreezerItem } from "$lib/stores";
+    import Item from "./Item.svelte";
 
-    interface ItemWithLocation {
-        container: string;
+    interface ItemByFreezer {
+        item: FreezerItem;
         freezerName: string;
     }
 
-    interface GroupedItem {
+    interface GroupedByName {
         name: string;
-        containers: ItemWithLocation[];
+        itemsByFreezer: ItemByFreezer[];
     }
 
     const groupedByContents = $derived.by(() => {
         if (!$appState) return [];
 
-        const itemMap = new Map<string, ItemWithLocation[]>();
+        // Group by item name, then by freezer
+        const nameMap = new Map<string, Map<string, FreezerItem>>();
 
         for (const freezer of $appState.Freezers) {
             for (const item of freezer.Contents) {
-                const existing = itemMap.get(item.Name) || [];
-                for (const container of item.Containers) {
-                    existing.push({
-                        container,
-                        freezerName: freezer.Name
-                    });
+                if (!nameMap.has(item.Name)) {
+                    nameMap.set(item.Name, new Map());
                 }
-                itemMap.set(item.Name, existing);
+                const freezerMap = nameMap.get(item.Name)!;
+                freezerMap.set(freezer.Name, item);
             }
         }
 
-        const result: GroupedItem[] = [];
-        for (const [name, containers] of itemMap) {
-            const sortedContainers = containers.sort((a, b) => {
-                const sorted = sortContainerNames([a.container, b.container]);
-                return sorted[0] === a.container ? -1 : 1;
-            });
-            result.push({ name, containers: sortedContainers });
+        const result: GroupedByName[] = [];
+        for (const [name, freezerMap] of nameMap) {
+            const itemsByFreezer: ItemByFreezer[] = [];
+            for (const [freezerName, item] of freezerMap) {
+                itemsByFreezer.push({ item, freezerName });
+            }
+            // Sort by freezer name for consistent ordering
+            itemsByFreezer.sort((a, b) => a.freezerName.localeCompare(b.freezerName));
+            result.push({ name, itemsByFreezer });
         }
 
         return result.sort((a, b) => a.name.localeCompare(b.name));
@@ -47,11 +47,12 @@
     {#each groupedByContents as group}
         <div class="flex flex-col gap-1">
             <h2 class="font-bold">{group.name}</h2>
-            <ul class="list-disc pl-6">
-                {#each group.containers as item}
-                    <li>{item.container} <span class="text-gray-500">({item.freezerName})</span></li>
-                {/each}
-            </ul>
+            {#each group.itemsByFreezer as entry}
+                <div class="pl-4 flex items-center gap-2">
+                    <span class="text-gray-500">({entry.freezerName})</span>
+                    <Item item={entry.item} freezerName={entry.freezerName} />
+                </div>
+            {/each}
         </div>
     {/each}
 </div>
