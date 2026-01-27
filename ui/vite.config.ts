@@ -15,6 +15,7 @@ export default defineConfig({
       "/remove": apiProxy,
       "/move": apiProxy,
     },
+    allowedHosts: true, // N.B. this is only safe if access to dev server is restricted by other means
   },
   preview: {
     proxy: {
