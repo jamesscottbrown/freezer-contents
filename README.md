@@ -1,5 +1,7 @@
 # Freezer Contents
 
+> :warning: This isn't really intended for general use. I wrote it hastily for myself, and then tidied it up using Claude code (partly as a exercise to familiarise myself with the state of coding agents). Feel free to use it, but I make no assurances about its quality.
+
 A webapp for keeping track of what food you have stored where (in freezers, and/or fridges, or cupboards...).
 
 It is opinionated, and asusmes that you can have a number of containers permanently labelled with identifiers, rather than their current contents, and use this app as an index to keep track of what each container's contents and location.
