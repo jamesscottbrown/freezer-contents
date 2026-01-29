@@ -20,7 +20,7 @@
         </ul>
     </div>
 
-    <button class="px-2 border border-green-500 rounded" onclick={() => addModalIsOpen = true}>Add Item</button>
+    <button class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm" onclick={() => addModalIsOpen = true}>Add Item</button>
 
     <AddItemModal bind:isOpen={addModalIsOpen} freezerName={freezer.Name} />
 </div>

@@ -1,9 +1,15 @@
 # Freezer Contents
 
-A webapp for inventorying food stored in one or more freezers (and/or fridges, or cupboards...).
+> :warning: This isn't really intended for general use. I wrote it hastily for myself, and then tidied it up using Claude code (partly as a exercise to familiarise myself with the state of coding agents). Feel free to use it, but I make no assurances about its quality.
 
-The assumption is that you can have a number of containers permanently labelled with identifiers, rather than their current contents, and use this app as an index to keep track of what each container's contents and location.
+A webapp for keeping track of what food you have stored where (in freezers, and/or fridges, or cupboards...).
 
+It is opinionated, and asusmes that you can have a number of containers permanently labelled with identifiers, rather than their current contents, and use this app as an index to keep track of what each container's contents and location.
+
+This has the advantage that you only need to write labels once, and as you need to write less (just a number, rather than a date and description) you can write larger, which is helpful if you have bad handwriting.
+It also forces you to record where each container is stored, which you might not bother to do if you had labelled containers with their current contents. 
+
+You could do the same thing with a fairly simple spreasheet, but the experience of editing from a mobile phone would probably be significantly worse.
 
 
 ## Project Structure
