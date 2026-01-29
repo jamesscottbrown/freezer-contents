@@ -128,39 +128,36 @@
     <div class="p-4 space-y-2">
         <p class="px-2">Selected Container: {selectedContainer}</p>
 
-        <div class="flex flex-col pl-2">
-            <div>
-                <button
-                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    onclick={removeContainer}
-                    disabled={isOperationPending}
-                >
-                    {#if isRemoving}
-                        Removing...
-                    {:else}
-                        Remove
-                    {/if}
-                </button>
+        <div class="flex flex-col pl-2 gap-2">
+            <button
+                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                onclick={removeContainer}
+                disabled={isOperationPending}
+            >
+                {#if isRemoving}
+                    Removing...
+                {:else}
+                    Remove
+                {/if}
+            </button>
 
-                <div class="flex gap-2">
-                Move to: 
-                {#each $appState?.Freezers ?? [] as freezer}
-                    {#if freezer.Name !== freezerName}
-                        <button
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            onclick={() => moveContainer(freezer.Name)}
-                            disabled={isOperationPending}
-                        >
-                            {#if isMoving}
-                                Moving...
-                            {:else}
-                               {freezer.Name}
-                            {/if}
-                        </button>
-                    {/if}
-                {/each}
-                </div>
-            </div>
+            Move to: 
+            
+            {#each $appState?.Freezers ?? [] as freezer}
+                {#if freezer.Name !== freezerName}
+                    <button
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        onclick={() => moveContainer(freezer.Name)}
+                        disabled={isOperationPending}
+                    >
+                        {#if isMoving}
+                            Moving...
+                        {:else}
+                            {freezer.Name}
+                        {/if}
+                    </button>
+                {/if}
+            {/each}
         </div>
     </div>
 </dialog>
