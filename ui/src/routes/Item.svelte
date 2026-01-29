@@ -98,11 +98,14 @@
             <div>
                 <button class="px-2 border border-red-500 rounded" onclick={removeContainer}>Remove</button>
 
+                <div class="flex gap-2">
+                Move to: 
                 {#each $appState?.Freezers ?? [] as freezer}
                     {#if freezer.Name !== freezerName}
-                        <button class="px-2 border border-green-500 rounded" onclick={() => moveContainer(freezer.Name)}>Move to {freezer.Name}</button>
+                        <button class="px-2 border border-green-500 rounded" onclick={() => moveContainer(freezer.Name)}>{freezer.Name}</button>
                     {/if}
                 {/each}
+                </div>
             </div>
         </div>
     </div>
