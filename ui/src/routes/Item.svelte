@@ -142,6 +142,8 @@
                     {/if}
                 </button>
 
+                <div class="flex gap-2">
+                Move to: 
                 {#each $appState?.Freezers ?? [] as freezer}
                     {#if freezer.Name !== freezerName}
                         <button
@@ -152,11 +154,12 @@
                             {#if isMoving}
                                 Moving...
                             {:else}
-                                Move to {freezer.Name}
+                               {freezer.Name}
                             {/if}
                         </button>
                     {/if}
                 {/each}
+                </div>
             </div>
         </div>
     </div>
