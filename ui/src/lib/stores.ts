@@ -33,7 +33,7 @@ export interface LoadingState {
   addItem: boolean;
   removeContainer: boolean;
   moveContainer: boolean;
-  renameItem: boolean;
+  editItem: boolean;
 }
 
 export const loadingState = writable<LoadingState>({
@@ -41,7 +41,7 @@ export const loadingState = writable<LoadingState>({
   addItem: false,
   removeContainer: false,
   moveContainer: false,
-  renameItem: false,
+  editItem: false,
 });
 
 // Helper to clear error after a delay

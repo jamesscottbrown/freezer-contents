@@ -42,7 +42,7 @@ func main() {
 	mux.HandleFunc("/remove", CORS(handleRemoveRequest))
 	mux.HandleFunc("/move", CORS(handleMoveRequest))
 	mux.HandleFunc("/add", CORS(handleAddRequest))
-	mux.HandleFunc("/rename", CORS(handleRenameRequest))
+	mux.HandleFunc("/edit", CORS(handleEditRequest))
 
 	mux.HandleFunc("/list", handleListRequest)
 
@@ -330,16 +330,17 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(buf.Bytes())
 }
 
-// rename item
-type RenameBody struct {
+// edit item (rename and/or change date)
+type EditBody struct {
 	OldName string
 	OldDate string
 	NewName string
+	NewDate string
 }
 
-func handleRenameRequest(w http.ResponseWriter, r *http.Request) {
+func handleEditRequest(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var t RenameBody
+	var t EditBody
 	err := decoder.Decode(&t)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -347,7 +348,7 @@ func handleRenameRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if t.OldName == "" || t.OldDate == "" || t.NewName == "" {
+	if t.OldName == "" || t.OldDate == "" || t.NewName == "" || t.NewDate == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Error: missing required fields")
 		return
@@ -363,11 +364,12 @@ func handleRenameRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// find and rename items with matching name and date
+	// find and update items with matching name and date
 	for i, freezer := range contents.Freezers {
 		for j, item := range freezer.Contents {
 			if item.Name == t.OldName && item.Date == t.OldDate {
 				contents.Freezers[i].Contents[j].Name = t.NewName
+				contents.Freezers[i].Contents[j].Date = t.NewDate
 			}
 		}
 	}

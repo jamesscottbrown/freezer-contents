@@ -1,13 +1,13 @@
 <script lang="ts">
     import { appState, type FreezerItem, errorMessage, loadingState, clearErrorAfterDelay } from "$lib/stores";
     import { sortContainerNames } from "$lib/containerNames";
-    import RenameItemModal from "./RenameItemModal.svelte";
+    import EditItemModal from "./EditItemModal.svelte";
 
     let { item, freezerName }: { item: FreezerItem; freezerName: string } = $props();
 
     let selectedContainer: string | undefined = $state(undefined);
     let dialogEl: HTMLDialogElement;
-    let isRenameModalOpen = $state(false);
+    let isEditModalOpen = $state(false);
 
     let isRemoving = $derived($loadingState.removeContainer);
     let isMoving = $derived($loadingState.moveContainer);
@@ -94,9 +94,9 @@
 <div class="flex gap-2 items-center">
     <span>{item.Name} ({item.Date})</span>
     <button
-        onclick={() => isRenameModalOpen = true}
+        onclick={() => isEditModalOpen = true}
         class="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
-        aria-label="Rename {item.Name}"
+        aria-label="Edit {item.Name}"
     >
         <!-- Heroicons pencil-square -->
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -110,7 +110,7 @@
     {/each}
 </div>
 
-<RenameItemModal {item} bind:isOpen={isRenameModalOpen} />
+<EditItemModal {item} bind:isOpen={isEditModalOpen} />
 
 
 <dialog
