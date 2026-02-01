@@ -772,6 +772,271 @@ func TestHandleMoveRequest_MoveLastContainer(t *testing.T) {
 	}
 }
 
+// ============== Tests for handleEditRequest ==============
+
+func TestHandleEditRequest_Success(t *testing.T) {
+	cleanup := setupTestEnv(t, sampleState)
+	defer cleanup()
+
+	body := EditBody{
+		OldName: "chicken",
+		OldDate: "2024-01-01",
+		NewName: "chicken tikka",
+		NewDate: "2024-01-01",
+	}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
+
+	var state State
+	err := json.Unmarshal(rec.Body.Bytes(), &state)
+	if err != nil {
+		t.Fatalf("Response is not valid JSON: %v", err)
+	}
+
+	// Verify the item was renamed
+	found := false
+	for _, freezer := range state.Freezers {
+		for _, item := range freezer.Contents {
+			if item.Name == "chicken tikka" {
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found {
+		t.Error("Expected item to be renamed to 'chicken tikka'")
+	}
+
+	// Verify the old name no longer exists
+	for _, freezer := range state.Freezers {
+		for _, item := range freezer.Contents {
+			if item.Name == "chicken" {
+				t.Error("Old item name 'chicken' should no longer exist")
+			}
+		}
+	}
+}
+
+func TestHandleEditRequest_ChangeDate(t *testing.T) {
+	cleanup := setupTestEnv(t, sampleState)
+	defer cleanup()
+
+	body := EditBody{
+		OldName: "chicken",
+		OldDate: "2024-01-01",
+		NewName: "chicken",
+		NewDate: "2024-06-15",
+	}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
+
+	var state State
+	err := json.Unmarshal(rec.Body.Bytes(), &state)
+	if err != nil {
+		t.Fatalf("Response is not valid JSON: %v", err)
+	}
+
+	// Verify the date was changed
+	found := false
+	for _, freezer := range state.Freezers {
+		for _, item := range freezer.Contents {
+			if item.Name == "chicken" && item.Date == "2024-06-15" {
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found {
+		t.Error("Expected item date to be changed to '2024-06-15'")
+	}
+}
+
+func TestHandleEditRequest_ChangeBoth(t *testing.T) {
+	cleanup := setupTestEnv(t, sampleState)
+	defer cleanup()
+
+	body := EditBody{
+		OldName: "chicken",
+		OldDate: "2024-01-01",
+		NewName: "beef stew",
+		NewDate: "2024-03-20",
+	}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
+
+	var state State
+	err := json.Unmarshal(rec.Body.Bytes(), &state)
+	if err != nil {
+		t.Fatalf("Response is not valid JSON: %v", err)
+	}
+
+	// Verify both name and date were changed
+	found := false
+	for _, freezer := range state.Freezers {
+		for _, item := range freezer.Contents {
+			if item.Name == "beef stew" && item.Date == "2024-03-20" {
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found {
+		t.Error("Expected item to be changed to 'beef stew' with date '2024-03-20'")
+	}
+}
+
+func TestHandleEditRequest_InvalidJSON(t *testing.T) {
+	cleanup := setupTestEnv(t, sampleState)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader([]byte("not json")))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for invalid JSON, got %d", rec.Code)
+	}
+}
+
+func TestHandleEditRequest_MissingFields(t *testing.T) {
+	cleanup := setupTestEnv(t, sampleState)
+	defer cleanup()
+
+	// Test missing NewName
+	body := EditBody{
+		OldName: "chicken",
+		OldDate: "2024-01-01",
+		NewName: "",
+		NewDate: "2024-01-01",
+	}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for missing NewName, got %d", rec.Code)
+	}
+
+	// Test missing NewDate
+	body = EditBody{
+		OldName: "chicken",
+		OldDate: "2024-01-01",
+		NewName: "chicken tikka",
+		NewDate: "",
+	}
+	bodyBytes, _ = json.Marshal(body)
+
+	req = httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	rec = httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for missing NewDate, got %d", rec.Code)
+	}
+
+	// Test missing OldName
+	body = EditBody{
+		OldName: "",
+		OldDate: "2024-01-01",
+		NewName: "chicken tikka",
+		NewDate: "2024-01-01",
+	}
+	bodyBytes, _ = json.Marshal(body)
+
+	req = httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	rec = httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for missing OldName, got %d", rec.Code)
+	}
+}
+
+func TestHandleEditRequest_NonExistentItem(t *testing.T) {
+	cleanup := setupTestEnv(t, sampleState)
+	defer cleanup()
+
+	body := EditBody{
+		OldName: "nonexistent",
+		OldDate: "2024-01-01",
+		NewName: "something",
+		NewDate: "2024-01-01",
+	}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/edit", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	handleEditRequest(rec, req)
+
+	// Should still return 200 (no error, just no items matched)
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
+
+	var state State
+	err := json.Unmarshal(rec.Body.Bytes(), &state)
+	if err != nil {
+		t.Fatalf("Response is not valid JSON: %v", err)
+	}
+
+	// Verify original item is unchanged
+	found := false
+	for _, freezer := range state.Freezers {
+		for _, item := range freezer.Contents {
+			if item.Name == "chicken" && item.Date == "2024-01-01" {
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found {
+		t.Error("Original item should be unchanged")
+	}
+}
+
 // ============== Tests for handleListRequest ==============
 
 func TestHandleListRequest(t *testing.T) {
