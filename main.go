@@ -42,6 +42,7 @@ func main() {
 	mux.HandleFunc("/remove", CORS(handleRemoveRequest))
 	mux.HandleFunc("/move", CORS(handleMoveRequest))
 	mux.HandleFunc("/add", CORS(handleAddRequest))
+	mux.HandleFunc("/rename", CORS(handleRenameRequest))
 
 	mux.HandleFunc("/list", handleListRequest)
 
@@ -305,6 +306,68 @@ func handleMoveRequest(w http.ResponseWriter, r *http.Request) {
 			// If item doesn't exist in new freezer, add it
 			if !itemExists {
 				contents.Freezers[i].Contents = append(contents.Freezers[i].Contents, Item{moveItem.Name, moveItem.Date, []string{t.Container}})
+			}
+		}
+	}
+
+	// save JSON to file
+	err = writeContents(contentsFile, contents)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error writing contents file:", err)
+		return
+	}
+
+	// return the json
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(contents)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Failed to convert updated contents to JSON", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(buf.Bytes())
+}
+
+// rename item
+type RenameBody struct {
+	OldName string
+	OldDate string
+	NewName string
+}
+
+func handleRenameRequest(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var t RenameBody
+	err := decoder.Decode(&t)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error parsing request body:", err)
+		return
+	}
+
+	if t.OldName == "" || t.OldDate == "" || t.NewName == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Error: missing required fields")
+		return
+	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+
+	contents, err := readContents(contentsFile)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	// find and rename items with matching name and date
+	for i, freezer := range contents.Freezers {
+		for j, item := range freezer.Contents {
+			if item.Name == t.OldName && item.Date == t.OldDate {
+				contents.Freezers[i].Contents[j].Name = t.NewName
 			}
 		}
 	}
