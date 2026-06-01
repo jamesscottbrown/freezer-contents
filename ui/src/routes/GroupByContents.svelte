@@ -15,27 +15,26 @@
     const groupedByContents = $derived.by(() => {
         if (!$appState) return [];
 
-        // Group by item name, then by freezer
-        const nameMap = new Map<string, Map<string, FreezerItem>>();
+        // Group by item name, collecting all items (including those with different dates)
+        const nameMap = new Map<string, ItemByFreezer[]>();
 
         for (const freezer of $appState.Freezers) {
             for (const item of freezer.Contents) {
                 if (!nameMap.has(item.Name)) {
-                    nameMap.set(item.Name, new Map());
+                    nameMap.set(item.Name, []);
                 }
-                const freezerMap = nameMap.get(item.Name)!;
-                freezerMap.set(freezer.Name, item);
+                nameMap.get(item.Name)!.push({ item, freezerName: freezer.Name });
             }
         }
 
         const result: GroupedByName[] = [];
-        for (const [name, freezerMap] of nameMap) {
-            const itemsByFreezer: ItemByFreezer[] = [];
-            for (const [freezerName, item] of freezerMap) {
-                itemsByFreezer.push({ item, freezerName });
-            }
-            // Sort by freezer name for consistent ordering
-            itemsByFreezer.sort((a, b) => a.freezerName.localeCompare(b.freezerName));
+        for (const [name, itemsByFreezer] of nameMap) {
+            // Sort by freezer name, then by date for consistent ordering
+            itemsByFreezer.sort((a, b) => {
+                const freezerCmp = a.freezerName.localeCompare(b.freezerName);
+                if (freezerCmp !== 0) return freezerCmp;
+                return a.item.Date.localeCompare(b.item.Date);
+            });
             result.push({ name, itemsByFreezer });
         }
 
