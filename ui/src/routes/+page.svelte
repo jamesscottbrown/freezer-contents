@@ -42,6 +42,9 @@
     onMount(getData);
 </script>
 
+<svelte:head>
+    <title>Freezer contents</title>
+<svelte:head>
 
 <div class="container flex flex-col gap-6 pt-4">
     <h1 class="font-bold text-2xl">Freezer contents</h1>
